@@ -223,3 +223,36 @@ class TaskDocumentation:
                 description="Частично обновить существующую задачу по идентификатору",
             ),
         }
+
+
+class NotificationDocumentation:
+    def __new__(cls):
+        tag = "Уведомления"
+        return {
+            "list": extend_schema(
+                tags=[tag], description="Получить список всех уведомлений"
+            ),
+            "retrieve": extend_schema(
+                tags=[tag],
+                parameters=[
+                    OpenApiParameter(
+                        name="id",
+                        description="Идентификатор уведомления",
+                        required=True,
+                        type=int,
+                        location=OpenApiParameter.PATH,
+                    )
+                ],
+                description="Получить конкретное уведомление по идентификатору",
+            ),
+            "create": extend_schema(
+                tags=[tag], description="Создать новое уведомление"
+            ),
+            "destroy": extend_schema(
+                tags=[tag], description="Удалить уведомление по идентификатору"
+            ),
+            "partial_update": extend_schema(
+                tags=[tag],
+                description="Частично обновить уведомление по идентификатору",
+            ),
+        }

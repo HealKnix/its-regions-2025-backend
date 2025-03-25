@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import authenticate, login, logout
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -8,6 +10,7 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 import its_regions_2025.serializers as serializers
+import its_regions_2025.permissions as permissions
 import its_regions_2025.models as models
 import its_regions_2025.docs as docs
 
@@ -26,29 +29,13 @@ class RegistrationViewSet(APIView):
     def post(self, request, *args, **kwargs) -> Response:
         serializer = serializers.UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = models.User.objects.create_user(
-                email=serializer.validated_data["email"],
-                username=serializer.validated_data["username"],
-                password=serializer.validated_data["password"],
-                first_name=serializer.validated_data.get("first_name", ""),
-                last_name=serializer.validated_data.get("last_name", ""),
-                patronymic=serializer.validated_data.get("patronymic", ""),
-            )
+            user = models.User.objects.create_user(**serializer.validated_data)
             token, _ = Token.objects.get_or_create(user=user)
 
+            user = serializers.UserSerializer(user).data
+
             return Response(
-                {
-                    "token": token.key,
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "email": user.email,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "patronymic": user.patronymic,
-                        "is_staff": user.is_staff,
-                    },
-                },
+                {**user, "token": token.key},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -58,26 +45,16 @@ class AuthenticatedAPIView(APIView):
     """API для проверки аутентификации пользователя по токену."""
 
     permission_classes = [IsAuthenticated]
-    serializer_class = None
+    serializer_class = serializers.AuthenticatedSerializer
 
     def post(self, request, *args, **kwargs) -> Response:
         token = request.META.get("HTTP_AUTHORIZATION", "").split(" ")[1]
 
         try:
             token_obj = Token.objects.get(key=token)
-            user = token_obj.user
+            user = serializers.UserSerializer(token_obj.user).data
             return Response(
-                {
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "patronymic": user.patronymic,
-                        "is_staff": user.is_staff,
-                        "email": user.email,
-                    }
-                },
+                user,
                 status=status.HTTP_200_OK,
             )
         except (Token.DoesNotExist, IndexError) as e:
@@ -107,19 +84,12 @@ class LoginViewSet(APIView):
             csrftoken = get_token(request)
             sessionid = request.session.session_key
 
+            user.last_login = datetime.now()
+
+            user = serializers.UserSerializer(user).data
+
             response = Response(
-                {
-                    "token": token.key,
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "patronymic": user.patronymic,
-                        "is_staff": user.is_staff,
-                        "email": user.email,
-                    },
-                },
+                {**user, "token": token.key},
                 status=status.HTTP_200_OK,
             )
 
@@ -153,7 +123,7 @@ class TypeObjectViewSet(viewsets.ModelViewSet):
     queryset = models.TypeObject.objects.all()
     serializer_class = serializers.TypeObjectSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.ObjectDocumentation())
@@ -161,7 +131,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
     queryset = models.Object.objects.all()
     serializer_class = serializers.ObjectSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.PriorityDocumentation())
@@ -169,7 +139,7 @@ class PriorityViewSet(viewsets.ModelViewSet):
     queryset = models.Priority.objects.all()
     serializer_class = serializers.PrioritySerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.StatusDocumentation())
@@ -177,15 +147,15 @@ class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.TaskDocumentation())
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = models.Task.objects.all()
     serializer_class = serializers.TaskSerializer
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    permission_classes = [IsAuthenticated, permissions.IsOwner]
+    http_method_names = ["get", "patch"]
 
 
 @extend_schema_view(**docs.TypeBreakingDocumentation())
@@ -193,7 +163,7 @@ class TypeBreakingViewSet(viewsets.ModelViewSet):
     queryset = models.TypeBreaking.objects.all()
     serializer_class = serializers.TypeBreakingSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.TypeQualityDocumentation())
@@ -201,4 +171,12 @@ class TypeQualityViewSet(viewsets.ModelViewSet):
     queryset = models.TypeQuality.objects.all()
     serializer_class = serializers.TypeQualitySerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get"]
+
+
+@extend_schema_view(**docs.NotificationDocumentation())
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = models.Notification.objects.all()
+    serializer_class = serializers.NotificationSerializer
+    permission_classes = [IsAuthenticated, permissions.IsOwner]
+    http_method_names = ["get", "post"]

@@ -113,3 +113,13 @@ class Task(models.Model):
     was_done = models.BooleanField(default=False)
     name_component = models.BooleanField(default=False)
     type_breaking = models.ForeignKey(TypeBreaking, on_delete=models.CASCADE)
+
+
+class Notification(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=65)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)

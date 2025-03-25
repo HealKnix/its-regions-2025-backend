@@ -1,19 +1,31 @@
 from rest_framework import serializers
-from its_regions_2025.models import (
-    User,
-    TypeObject,
-    Object,
-    Priority,
-    Status,
-    Task,
-    TypeBreaking,
-    TypeQuality,
-)
+import its_regions_2025.models as models
+
+
+class AuthenticatedSerializer(serializers.Serializer):
+    class Meta:
+        model = models.User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "patronymic",
+            "is_staff",
+            "email",
+        ]
 
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(required=True)
     password = serializers.CharField(required=True, write_only=True)
+
+    class Meta:
+        model = models.User
+        fields = [
+            "email",
+            "password",
+        ]
 
 
 class LogoutSerializer(serializers.Serializer):
@@ -22,43 +34,43 @@ class LogoutSerializer(serializers.Serializer):
 
 class TypeObjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TypeObject
+        model = models.TypeObject
         fields = ["id", "name"]
 
 
 class ObjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Object
+        model = models.Object
         fields = ["id", "name", "type", "longitude", "latitude"]
 
 
 class PrioritySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Priority
+        model = models.Priority
         fields = ["id", "name"]
 
 
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Status
+        model = models.Status
         fields = ["id", "name"]
 
 
 class TypeBreakingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TypeBreaking
+        model = models.TypeBreaking
         fields = ["id", "name"]
 
 
 class TypeQualitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = TypeQuality
+        model = models.TypeQuality
         fields = ["id", "name"]
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = models.User
         fields = [
             "id",
             "email",
@@ -73,7 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Task
+        model = models.Task
         fields = [
             "id",
             "name",
@@ -92,4 +104,19 @@ class TaskSerializer(serializers.ModelSerializer):
             "was_done",
             "name_component",
             "type_breaking",
+        ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Notification
+        fields = [
+            "id",
+            "task",
+            "user",
+            "title",
+            "message",
+            "created_at",
+            "is_read",
+            "is_deleted",
         ]
