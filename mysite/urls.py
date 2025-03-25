@@ -14,27 +14,37 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
     SpectacularRedocView,
 )
 
+from its_regions_2025.views import (
+    AuthenticatedAPIView,
+    LoginViewSet,
+    LogoutViewSet,
+    RegistrationViewSet,
+)
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("admin/", admin.site.urls),
+    path("auth/", AuthenticatedAPIView.as_view(), name="auth"),
+    path("login/", LoginViewSet.as_view(), name="login"),
+    path("register/", RegistrationViewSet.as_view(), name="register"),
+    path("logout/", LogoutViewSet.as_view(), name="logout"),
+    path("api/v1/", include("its_regions_2025.urls"), name="api"),
     # Yaml openapi
-    path('api/openapi/', SpectacularAPIView.as_view(), name='schema'),
+    path("api/openapi/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
     path(
-        'api/docs/',
-        SpectacularSwaggerView.as_view(url_name='schema'),
-        name='swagger-ui'
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
     ),
-    path(
-        'api/redoc/',
-        SpectacularRedocView.as_view(url_name='schema'),
-        name='redoc'
-    ),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
