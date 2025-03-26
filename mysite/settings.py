@@ -31,11 +31,13 @@ SECRET_KEY = "django-insecure-8wx1#+0=(j^=(8@gt*1k@w4w$j#usdhhr(^^^(_oj(_66ep#r7
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -63,6 +65,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -149,3 +152,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom User model
 AUTH_USER_MODEL = "its_regions_2025.User"
+
+LANGUAGE_CODE = "ru"

@@ -256,3 +256,36 @@ class NotificationDocumentation:
                 description="Частично обновить уведомление по идентификатору",
             ),
         }
+
+
+class UserDocumentation:
+    def __new__(cls):
+        tag = "Пользователи"
+        return {
+            "list": extend_schema(
+                tags=[tag], description="Получить список всех пользователей"
+            ),
+            "retrieve": extend_schema(
+                tags=[tag],
+                parameters=[
+                    OpenApiParameter(
+                        name="id",
+                        description="Идентификатор пользователя",
+                        required=True,
+                        type=int,
+                        location=OpenApiParameter.PATH,
+                    )
+                ],
+                description="Получить конкретное уведомление по идентификатору",
+            ),
+            "create": extend_schema(
+                tags=[tag], description="Создать новое уведомление"
+            ),
+            "destroy": extend_schema(
+                tags=[tag], description="Удалить уведомление по идентификатору"
+            ),
+            "partial_update": extend_schema(
+                tags=[tag],
+                description="Частично обновить уведомление по идентификатору",
+            ),
+        }

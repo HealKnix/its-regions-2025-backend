@@ -53,8 +53,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     patronymic = models.CharField(_("Отчество"), max_length=30)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(blank=True, null=True)
+    date_joined = models.DateTimeField(
+        auto_now_add=True,
+    )
+    last_login = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
 
     objects = CustomUserManager()
 
@@ -66,60 +71,137 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class TypeObject(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+
+    def __str__(self):
+        return self.name
 
 
 class Object(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    type = models.ForeignKey(TypeObject, on_delete=models.CASCADE)
-    longitude = models.DecimalField(max_digits=10, decimal_places=8)
-    latitude = models.DecimalField(max_digits=10, decimal_places=8)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+    type = models.ForeignKey(TypeObject, on_delete=models.CASCADE, verbose_name="Тип")
+    longitude = models.DecimalField(
+        max_digits=11, decimal_places=8, verbose_name="Долгота"
+    )
+    latitude = models.DecimalField(
+        max_digits=11, decimal_places=8, verbose_name="Широта"
+    )
+    mark_description = models.CharField(
+        max_length=255, null=True, verbose_name="Описание"
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Объекты"
+        verbose_name_plural = "Объекты"
 
 
 class Priority(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Приоритеты"
+        verbose_name_plural = "Приоритеты"
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Статусы"
+        verbose_name_plural = "Статусы"
 
 
 class TypeQuality(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Качество"
+        verbose_name_plural = "Качество"
 
 
 class TypeBreaking(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+
+    def __str__(self):
+        return self.name
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    priority = models.ForeignKey(Priority, on_delete=models.CASCADE)
-    status = models.ForeignKey(Status, on_delete=models.CASCADE)
-    object = models.ForeignKey(Object, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, unique=True, verbose_name="Название")
+    priority = models.ForeignKey(
+        Priority, on_delete=models.CASCADE, verbose_name="Приоритет"
+    )
+    status = models.ForeignKey(Status, on_delete=models.CASCADE, verbose_name="Статус")
+    object = models.ForeignKey(Object, on_delete=models.CASCADE, verbose_name="Объект")
     executor = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="tasks_executed"
+        User,
+        on_delete=models.CASCADE,
+        related_name="tasks_executed",
+        verbose_name="Исполнитель",
     )
     creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="tasks_created"
+        User,
+        on_delete=models.CASCADE,
+        related_name="tasks_created",
+        verbose_name="Создатель",
     )
-    quality_report = models.ForeignKey(TypeQuality, on_delete=models.CASCADE)
-    start_date = models.DateTimeField(blank=True, null=True)
-    deadline = models.DateTimeField(blank=True, null=True)
-    text_report = models.TextField(blank=True, null=True)
-    description = models.TextField()
-    diagnostic_data = models.BooleanField(default=False)
-    result = models.BooleanField(default=False)
-    was_done = models.BooleanField(default=False)
-    name_component = models.BooleanField(default=False)
-    type_breaking = models.ForeignKey(TypeBreaking, on_delete=models.CASCADE)
+    quality_report = models.ForeignKey(
+        TypeQuality,
+        on_delete=models.CASCADE,
+        null=True,
+        default=4,
+        verbose_name="Качество отчета",
+    )
+    start_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата начала")
+    deadline = models.DateTimeField(
+        blank=True, null=True, verbose_name="Срок выполнения", default=None
+    )
+    text_report = models.TextField(
+        blank=True, null=True, verbose_name="Текстовый отчет"
+    )
+    description = models.TextField(verbose_name="Описание")
+    diagnostic_data = models.BooleanField(
+        default=False, verbose_name="Диагностические данные"
+    )
+    result = models.BooleanField(default=False, verbose_name="Результат")
+    was_done = models.BooleanField(default=False, verbose_name="Выполнено")
+    name_component = models.BooleanField(
+        default=False, verbose_name="Название компонента"
+    )
+    type_breaking = models.ForeignKey(
+        TypeBreaking, on_delete=models.CASCADE, verbose_name="Тип поломки"
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Задачи"
+        verbose_name_plural = "Задачи"
 
 
 class Notification(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=65)
-    message = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, verbose_name="Задача")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    title = models.CharField(max_length=65, verbose_name="Заголовок")
+    message = models.CharField(max_length=255, verbose_name="Сообщение")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_read = models.BooleanField(default=False, verbose_name="Прочитано")
+    is_deleted = models.BooleanField(default=False, verbose_name="Удалено")
+
+    def __str__(self):
+        return self.title

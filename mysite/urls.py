@@ -33,18 +33,20 @@ from its_regions_2025.views import (
 urlpatterns = [
     path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("admin/", admin.site.urls),
-    path("auth/", AuthenticatedAPIView.as_view(), name="auth"),
-    path("login/", LoginViewSet.as_view(), name="login"),
-    path("register/", RegistrationViewSet.as_view(), name="register"),
-    path("logout/", LogoutViewSet.as_view(), name="logout"),
+    path("api/v1/auth/", AuthenticatedAPIView.as_view(), name="auth"),
+    path("api/v1/login/", LoginViewSet.as_view(), name="login"),
+    path("api/v1/register/", RegistrationViewSet.as_view(), name="register"),
+    path("api/v1/logout/", LogoutViewSet.as_view(), name="logout"),
     path("api/v1/", include("its_regions_2025.urls"), name="api"),
     # Yaml openapi
-    path("api/openapi/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/v1/openapi/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
     path(
-        "api/docs/",
+        "api/v1/docs/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
-    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path(
+        "api/v1/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
+    ),
 ]

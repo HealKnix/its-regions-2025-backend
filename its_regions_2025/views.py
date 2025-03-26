@@ -34,8 +34,12 @@ class RegistrationViewSet(APIView):
 
             user = serializers.UserSerializer(user).data
 
+            user_is_admin = models.User.objects.filter(
+                email=user["email"], is_superuser=True
+            ).exists()
+
             return Response(
-                {**user, "token": token.key},
+                {**user, "token": token.key, "is_admin": user_is_admin},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -53,8 +57,13 @@ class AuthenticatedAPIView(APIView):
         try:
             token_obj = Token.objects.get(key=token)
             user = serializers.UserSerializer(token_obj.user).data
+
+            user_is_admin = models.User.objects.filter(
+                email=user["email"], is_superuser=True
+            ).exists()
+
             return Response(
-                user,
+                {**user, "is_admin": user_is_admin},
                 status=status.HTTP_200_OK,
             )
         except (Token.DoesNotExist, IndexError) as e:
@@ -88,8 +97,12 @@ class LoginViewSet(APIView):
 
             user = serializers.UserSerializer(user).data
 
+            user_is_admin = models.User.objects.filter(
+                email=user["email"], is_superuser=True
+            ).exists()
+
             response = Response(
-                {**user, "token": token.key},
+                {**user, "token": token.key, "is_admin": user_is_admin},
                 status=status.HTTP_200_OK,
             )
 
@@ -116,6 +129,14 @@ class LogoutViewSet(APIView):
         return Response(
             {"detail": "Successfully logged out"}, status=status.HTTP_200_OK
         )
+
+
+@extend_schema_view(**docs.UserDocumentation())
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
 
 
 @extend_schema_view(**docs.TypeObjectDocumentation())
@@ -157,6 +178,9 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, permissions.IsOwner]
     http_method_names = ["get", "patch"]
 
+    def get_queryset(self):
+        return models.Task.objects.filter(executor=self.request.user)
+
 
 @extend_schema_view(**docs.TypeBreakingDocumentation())
 class TypeBreakingViewSet(viewsets.ModelViewSet):
@@ -180,3 +204,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.NotificationSerializer
     permission_classes = [IsAuthenticated, permissions.IsOwner]
     http_method_names = ["get", "post"]
+
+    def get_queryset(self):
+        return models.Notification.objects.filter(user=self.request.user)

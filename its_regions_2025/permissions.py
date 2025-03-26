@@ -10,7 +10,7 @@ class IsOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Администраторы имеют полный доступ
-        if request.user.is_staff:
+        if request.user.is_superuser:
             return True
 
         # Проверяем есть ли у объекта поле user или user_id
@@ -23,5 +23,7 @@ class IsOwner(BasePermission):
         # Для задач проверяем создателя
         if hasattr(obj, "creator"):
             return obj.creator == request.user
+        if hasattr(obj, "executor"):
+            return obj.executor == request.user
 
         return False
