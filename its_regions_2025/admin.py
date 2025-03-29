@@ -9,6 +9,10 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ["name"]
 
 
+class TaskVersionAdmin(admin.ModelAdmin):
+    pass
+
+
 class ObjectAdmin(admin.ModelAdmin):
     list_display = ["name"]
 
@@ -26,6 +30,7 @@ class TypeQualityAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Task, TaskAdmin)
+admin.site.register(models.TaskVersion, TaskVersionAdmin)
 admin.site.register(models.Object, ObjectAdmin)
 admin.site.register(models.Status, StatusAdmin)
 admin.site.register(models.Priority, PriorityAdmin)

@@ -289,3 +289,24 @@ class UserDocumentation:
                 description="Частично обновить уведомление по идентификатору",
             ),
         }
+
+
+class RecommendationDocumentation:
+    def __new__(cls):
+        tag = "Рекомендации"
+        return {
+            "list": extend_schema(tags=[tag], description="Получить список всех задач"),
+            "retrieve": extend_schema(
+                tags=[tag],
+                parameters=[
+                    OpenApiParameter(
+                        name="id",
+                        description="Идентификатор задачи",
+                        required=True,
+                        type=int,
+                        location=OpenApiParameter.PATH,
+                    )
+                ],
+                description="Получить конкретную задачу по идентификатору",
+            ),
+        }

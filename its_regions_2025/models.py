@@ -3,6 +3,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -190,6 +191,7 @@ class Task(models.Model):
     class Meta:
         verbose_name = "Задачи"
         verbose_name_plural = "Задачи"
+        ordering = ["status"]
 
 
 class Notification(models.Model):
@@ -205,3 +207,18 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class TaskVersion(models.Model):
+    version_uuid = models.UUIDField(
+        default=uuid.uuid4, blank=True, verbose_name="UUID версии"
+    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, verbose_name="Задача")
+    field = models.CharField(max_length=255, blank=True, verbose_name="Измененное поле")
+    value = models.CharField(max_length=255, blank=True, verbose_name="Значение поля")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Сотрудник")
+    updated_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата изменения")
+
+    class Meta:
+        verbose_name = "Версии задачи"
+        verbose_name_plural = "Версии задачи"

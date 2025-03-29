@@ -10,9 +10,13 @@ router.register(r"objects", views.ObjectViewSet, basename="objects")
 router.register(r"priorities", views.PriorityViewSet, basename="priorities")
 router.register(r"statuses", views.StatusViewSet, basename="statuses")
 router.register(r"tasks", views.TaskViewSet, basename="tasks")
+router.register(r"tasks_versions", views.TaskVersionViewSet, basename="tasks_versions")
 router.register(r"type_breakings", views.TypeBreakingViewSet, basename="type_breakings")
 router.register(r"type_qualities", views.TypeQualityViewSet, basename="type_qualities")
 router.register(r"notifications", views.NotificationViewSet, basename="notifications")
+router.register(
+    r"recommendations", views.RecommendationViewSet, basename="recommendations"
+)
 
 urlpatterns = [
     path("", include(router.urls)),

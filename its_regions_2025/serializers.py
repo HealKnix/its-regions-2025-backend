@@ -79,6 +79,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "patronymic",
             "password",
+            "is_superuser",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -104,6 +105,20 @@ class TaskSerializer(serializers.ModelSerializer):
             "was_done",
             "name_component",
             "type_breaking",
+        ]
+
+
+class TaskVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TaskVersion
+        fields = [
+            "id",
+            "version_uuid",
+            "task",
+            "field",
+            "value",
+            "user",
+            "updated_at",
         ]
 
 

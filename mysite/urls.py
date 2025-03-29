@@ -28,16 +28,20 @@ from its_regions_2025.views import (
     LoginViewSet,
     LogoutViewSet,
     RegistrationViewSet,
+    AllDataViewSet,
+    index,
 )
 
 urlpatterns = [
     path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("ddos/", index, name="ddos"),
     path("admin/", admin.site.urls),
     path("api/v1/auth/", AuthenticatedAPIView.as_view(), name="auth"),
     path("api/v1/login/", LoginViewSet.as_view(), name="login"),
     path("api/v1/register/", RegistrationViewSet.as_view(), name="register"),
     path("api/v1/logout/", LogoutViewSet.as_view(), name="logout"),
-    path("api/v1/", include("its_regions_2025.urls"), name="api"),
+    path("api/v1/allData/", AllDataViewSet.as_view(), name="all-data"),
+    path("api/v1/data/", include("its_regions_2025.urls"), name="api"),
     # Yaml openapi
     path("api/v1/openapi/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
